@@ -116,6 +116,24 @@ public class ClaimEndpointsTests(WebApplicationFactory<Program> factory) : IClas
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    [Fact]
+    public async Task Max_claim_amount_comes_from_configuration()
+    {
+        using var customFactory = factory.WithWebHostBuilder(builder =>
+            builder.UseSetting("ClaimRules:MaxClaimAmount", "1000")
+        );
+
+        var client = customFactory.CreateClient();
+
+        var response = await client.PostAsJsonAsync(
+            "/claims",
+            new CreateClaimRequest("POL-123456", "MaxClaimAmount from config", 1500m, DaysAgo(1)),
+            Ct
+        );
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     [Theory]
     [InlineData("123456789012", false)]
     [InlineData("123456", true)]
@@ -125,9 +143,11 @@ public class ClaimEndpointsTests(WebApplicationFactory<Program> factory) : IClas
         int maxLength = 10
     )
     {
-        var _client = factory
-            .WithWebHostBuilder(builder => builder.UseSetting("ClaimRules:MaxNotesLength", maxLength + ""))
-            .CreateClient();
+        using var customFactory = factory.WithWebHostBuilder(builder =>
+            builder.UseSetting("ClaimRules:MaxNotesLength", maxLength + "")
+        );
+
+        var _client = customFactory.CreateClient();
         var submitted = await _client.GetFromJsonAsync<List<ClaimResponse>>("/claims?status=Submitted", Json, Ct);
 
         var response = await _client.PostAsJsonAsync(
