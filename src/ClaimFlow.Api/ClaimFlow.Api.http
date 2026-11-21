@@ -1,0 +1,64 @@
+@host = http://localhost:5088
+
+### List open claims
+GET {{host}}/claims?status=Submitted
+
+### File a new claim
+# @name create
+POST {{host}}/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL-777001",
+  "description": "Kitchen fire damaged cabinets",
+  "claimedAmount": 5200.50,
+  "incidentDate": "2026-11-02"
+}
+
+### Validate 'incidentDate not in future'
+# @name create
+POST {{host}}/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL-777001",
+  "description": "Kitchen fire damaged cabinets",
+  "claimedAmount": 5200.50,
+  "incidentDate": "2027-11-02"
+}
+
+### Validate 'incidentDate can be too far in the past'
+# @name create
+POST {{host}}/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL-777001",
+  "description": "Kitchen fire damaged cabinets",
+  "claimedAmount": 5200.50,
+  "incidentDate": "2020-11-02"
+}
+
+### Approve the claim we just created
+POST {{host}}/claims/{{create.response.body.$.id}}/approve
+Content-Type: application/json
+
+{ "note": "Fire report attached" }
+
+### Reject without a reason (watch what happens)
+POST {{host}}/claims/{{create.response.body.$.id}}/reject
+Content-Type: application/json
+
+{ "reason": "" }
+
+### Integration test
+# @name create
+POST {{host}}/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL-123456",
+  "description": "Water leak in the bathroom ceiling",
+  "ClaimedAmount": 900.00,
+  "incidentDate": "2026-11-05"
+}

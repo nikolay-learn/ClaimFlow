@@ -1,0 +1,7 @@
+GET http://localhost:5088/claims/queue
+
+###
+
+GET http://localhost:5088/policies/POL-1/claims
+
+###

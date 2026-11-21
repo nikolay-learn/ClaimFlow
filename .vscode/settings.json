@@ -1,0 +1,4 @@
+{
+    "dotnet.defaultSolution": "ClaimFlow.slnx",
+    "github.copilot.completions.chat.enabled": true
+}
