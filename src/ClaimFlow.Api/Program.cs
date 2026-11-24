@@ -7,9 +7,7 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
-    options.SerializerOptions.Converters.Add(
-        new System.Text.Json.Serialization.JsonStringEnumConverter()
-    )
+    options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter())
 );
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
@@ -32,13 +30,20 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+
+    app.MapGet(
+        "/debug/config-sources",
+        (IConfiguration config) => ((IConfigurationRoot)config).Providers.Select(p => p.ToString()).ToList()
+    );
+}
+
+if (!string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("ClaimsDb")))
+{
+    app.Logger.LogInformation("ClaimsDb connection string found (database storage arrives in lesson 18 only)");
 }
 
 app.MapGet("/", () => "ClaimFlow API is running");
-app.MapGet(
-    "/health",
-    () => Results.Ok(new { Status = "Healthy", CheckedAt = DateTimeOffset.UtcNow })
-);
+app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", CheckedAt = DateTimeOffset.UtcNow }));
 app.MapGet(
     "/version",
     () =>
