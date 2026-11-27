@@ -5,7 +5,7 @@ using ClaimFlow.Api.Features.Claims;
 using ClaimFlow.Api.Infrastructure;
 using Scalar.AspNetCore;
 
-Console.WriteLine("Test CI");
+Console.WriteLine("Test CI 1");
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
