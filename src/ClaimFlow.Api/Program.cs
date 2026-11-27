@@ -15,11 +15,7 @@ builder.Services.AddValidation();
 builder.Services.AddExceptionHandler<ClaimRuleExceptionHandler>();
 builder.Services.AddSingleton<IClaimRepository, InMemoryClaimRepository>();
 
-builder
-    .Services.AddOptions<ClaimRulesOptions>()
-    .BindConfiguration(ClaimRulesOptions.SectionName)
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+builder.Services.AddOptions<ClaimRulesOptions>().BindConfiguration(ClaimRulesOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 
 var app = builder.Build();
 
@@ -31,15 +27,12 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 
-    app.MapGet(
-        "/debug/config-sources",
-        (IConfiguration config) => ((IConfigurationRoot)config).Providers.Select(p => p.ToString()).ToList()
-    );
+    app.MapGet("/debug/config-sources", (IConfiguration config) => ((IConfigurationRoot)config).Providers.Select(p => p.ToString()).ToList());
 }
 
 if (!string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("ClaimsDb")))
 {
-    app.Logger.LogInformation("ClaimsDb connection string found (database storage arrives in lesson 18 only)");
+    app.Logger.ClaimdDbConfigured();
 }
 
 app.MapGet("/", () => "ClaimFlow API is running");
@@ -59,11 +52,7 @@ app.MapGet(
 
 app.MapGet(
     "/payout",
-    (
-        [Range(0, double.MaxValue)] decimal amount,
-        [Range(0, double.MaxValue)] decimal deductible,
-        [Range(0, double.MaxValue)] decimal limit
-    ) =>
+    ([Range(0, double.MaxValue)] decimal amount, [Range(0, double.MaxValue)] decimal deductible, [Range(0, double.MaxValue)] decimal limit) =>
     {
         var payout = PayoutCalculator.Calculate(amount, deductible, limit);
         return new

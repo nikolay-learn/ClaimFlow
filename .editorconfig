@@ -1,2 +1,43 @@
+# Code style for the whole repository. Editors and `dotnet build` both read this file.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,xml,csproj,props,slnx,yml,yaml}]
+indent_size = 2
+
 [*.cs]
-max_line_length = 120
+max_line_length = 150
+# Namespaces: one style everywhere (file-scoped, introduced in lesson 2)
+csharp_style_namespace_declarations = file_scoped:warning
+dotnet_diagnostic.IDE0161.severity = warning
+
+# Braces on every if/else, even one-liners
+csharp_prefer_braces = true:warning
+dotnet_diagnostic.IDE0011.severity = warning
+
+# 'var' when the type is obvious
+csharp_style_var_when_type_is_apparent = true:suggestion
+
+# Private fields: _camelCase
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+
+# Async methods must be awaited (lesson 9's CS4014 is already an error via TreatWarningsAsErrors)
+# Library-style rule that doesn't fit ASP.NET Core apps: no ConfigureAwait(false) needed
+dotnet_diagnostic.CA2007.severity = none
+
+[tests/**.cs]
+# Test method names are sentences with underscores
+dotnet_diagnostic.CA1707.severity = none

@@ -5,3 +5,17 @@ GET http://localhost:5088/claims/queue
 GET http://localhost:5088/policies/POL-1/claims
 
 ###
+
+# POST http://localhost:5088/claims
+POST http://localhost:5000/claims
+Content-Type: application/json
+X-Correlation-Id: demo-42
+
+{
+    "PolicyNumber":"POL-345678",
+    "Description":"This claim description could not be less that 10 chars",
+    "ClaimedAmount": 300,
+    "IncidentDate": "2026-01-01"
+}
+
+###

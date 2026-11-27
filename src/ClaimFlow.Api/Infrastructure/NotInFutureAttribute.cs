@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace ClaimFlow.Api.Infrastructure;
 
@@ -12,7 +13,10 @@ public sealed class NotInFutureAttribute(int MaxPastYears = 3) : ValidationAttri
     {
         if (value is not DateOnly date)
         {
-            return new ValidationResult("Expected DateOnly value", [validationContext.MemberName]);
+            return new ValidationResult(
+                "Expected DateOnly value",
+                validationContext.MemberName is not null ? [validationContext.MemberName] : []
+            );
         }
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -20,7 +24,7 @@ public sealed class NotInFutureAttribute(int MaxPastYears = 3) : ValidationAttri
         {
             return new ValidationResult(
                 "Date can't be in the future",
-                [validationContext.MemberName]
+                validationContext.MemberName is not null ? [validationContext.MemberName] : []
             );
         }
 
@@ -28,7 +32,7 @@ public sealed class NotInFutureAttribute(int MaxPastYears = 3) : ValidationAttri
         {
             return new ValidationResult(
                 $"Date should be maximum {MaxPastYears} years till today",
-                [validationContext.MemberName]
+                validationContext.MemberName is not null ? [validationContext.MemberName] : []
             );
         }
 

@@ -33,10 +33,7 @@ public static class ClaimEndpoints
         return TypedResults.Ok(claims.Select(ClaimResponse.From).ToList());
     }
 
-    private static async Task<Ok<List<ClaimStatsRow>>> GetStats(
-        IClaimRepository repository,
-        CancellationToken cancellationToken
-    )
+    private static async Task<Ok<List<ClaimStatsRow>>> GetStats(IClaimRepository repository, CancellationToken cancellationToken)
     {
         var claims = await repository.ListAsync(cancellationToken: cancellationToken);
         return TypedResults.Ok(
@@ -60,6 +57,7 @@ public static class ClaimEndpoints
     private static async Task<Created<ClaimResponse>> CreateClaim(
         CreateClaimRequest request,
         IClaimRepository repository,
+        ILogger<Claim> logger,
         CancellationToken cancellationToken = default
     )
     {
@@ -72,6 +70,7 @@ public static class ClaimEndpoints
         };
 
         await repository.AddAsync(claim, cancellationToken);
+        logger.ClaimSubmitted(claim.Id, claim.PolicyNumber, claim.ClaimedAmount);
         return TypedResults.Created($"/claims/{claim.Id}", ClaimResponse.From(claim));
     }
 
@@ -79,15 +78,18 @@ public static class ClaimEndpoints
         Guid id,
         ReviewClaimRequest request,
         IClaimRepository repository,
+        ILogger<Claim> logger,
         CancellationToken cancellationToken
     )
     {
         if (await repository.FindAsync(id, cancellationToken) is not { } claim)
         {
+            logger.ClaimNotFound(id);
             return TypedResults.NotFound();
         }
 
         claim.Approve(request.Note);
+        logger.ClaimApproved(claim.Id);
         return TypedResults.Ok(ClaimResponse.From(claim));
     }
 
@@ -95,15 +97,18 @@ public static class ClaimEndpoints
         Guid id,
         RejectClaimRequest request,
         IClaimRepository repository,
+        ILogger<Claim> logger,
         CancellationToken cancellationToken
     )
     {
         if (await repository.FindAsync(id, cancellationToken) is not { } claim)
         {
+            logger.ClaimNotFound(id);
             return TypedResults.NotFound();
         }
 
         claim.Reject(request.Reason);
+        logger.ClaimRejected(claim.Id, request.Reason);
         return TypedResults.Ok(ClaimResponse.From(claim));
     }
 
@@ -111,24 +116,16 @@ public static class ClaimEndpoints
         Guid id,
         IClaimRepository repository,
         CancellationToken cancellationToken
-    ) =>
-        await repository.RemoveAsync(id, cancellationToken)
-            ? TypedResults.NoContent()
-            : TypedResults.NotFound();
+    ) => await repository.RemoveAsync(id, cancellationToken) ? TypedResults.NoContent() : TypedResults.NotFound();
 
-    private static async Task<Ok<DashboardResponse>> Dashboard(
-        IClaimRepository repository,
-        CancellationToken cancellationToken
-    )
+    private static async Task<Ok<DashboardResponse>> Dashboard(IClaimRepository repository, CancellationToken cancellationToken)
     {
         var submitted = repository.ListAsync(ClaimStatus.Submitted, cancellationToken);
         var inReview = repository.ListAsync(ClaimStatus.InReview, cancellationToken);
 
         await Task.WhenAll(submitted, inReview);
 
-        return TypedResults.Ok(
-            new DashboardResponse(submitted.Result.Count, inReview.Result.Count)
-        );
+        return TypedResults.Ok(new DashboardResponse(submitted.Result.Count, inReview.Result.Count));
     }
 }
 

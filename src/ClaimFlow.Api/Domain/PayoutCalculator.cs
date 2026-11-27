@@ -37,7 +37,7 @@ public static class PayoutCalculator
         {
             < 1_000m => "Small",
             < 10_000m => "Medium",
-            _ => "Large"
+            _ => "Large",
         };
     }
 }

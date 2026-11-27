@@ -1,16 +1,12 @@
 using ClaimFlow.Api.Domain;
+using ClaimFlow.Api.Features.Claims;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace ClaimFlow.Api.Infrastructure;
 
-public sealed class ClaimRuleExceptionHandler(IProblemDetailsService problemDetails)
-    : IExceptionHandler
+public sealed class ClaimRuleExceptionHandler(IProblemDetailsService problemDetails, ILogger logger) : IExceptionHandler
 {
-    public async ValueTask<bool> TryHandleAsync(
-        HttpContext httpContext,
-        Exception exception,
-        CancellationToken cancellationToken
-    )
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         if (exception is not ClaimRuleViolationException)
         {
@@ -18,6 +14,7 @@ public sealed class ClaimRuleExceptionHandler(IProblemDetailsService problemDeta
         }
 
         httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+        logger.ClaimRuleViolated(exception.Message);
 
         return await problemDetails.TryWriteAsync(
             new ProblemDetailsContext
