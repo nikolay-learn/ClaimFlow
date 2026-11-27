@@ -5,8 +5,6 @@ using ClaimFlow.Api.Features.Claims;
 using ClaimFlow.Api.Infrastructure;
 using Scalar.AspNetCore;
 
-Console.WriteLine("Test CI");
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
     options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter())
@@ -16,6 +14,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddValidation();
 builder.Services.AddExceptionHandler<ClaimRuleExceptionHandler>();
 builder.Services.AddSingleton<IClaimRepository, InMemoryClaimRepository>();
+builder.Services.AddLogging();
 
 builder.Services.AddOptions<ClaimRulesOptions>().BindConfiguration(ClaimRulesOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
 

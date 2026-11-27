@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Diagnostics;
 
 namespace ClaimFlow.Api.Infrastructure;
 
-public sealed class ClaimRuleExceptionHandler(IProblemDetailsService problemDetails, ILogger logger) : IExceptionHandler
+public sealed class ClaimRuleExceptionHandler(IProblemDetailsService problemDetails, ILogger<ClaimRuleExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
