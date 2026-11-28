@@ -16,12 +16,7 @@ public class PayoutCalculatorTests
 
     [Theory]
     [MemberData(nameof(Cases))]
-    public void Calculate_applies_deductible_and_limit(
-        decimal claimed,
-        decimal deductible,
-        decimal limit,
-        decimal expected
-    )
+    public void Calculate_applies_deductible_and_limit(decimal claimed, decimal deductible, decimal limit, decimal expected)
     {
         decimal payout = PayoutCalculator.Calculate(claimed, deductible, limit);
 
