@@ -8,7 +8,7 @@ public class PayoutCalculatorTests
         new()
         {
             // claimed, deductible, limit, expected
-            { 1200m, 250m, 5000m, 951m }, // normal claim
+            { 1200m, 250m, 5000m, 950m }, // normal claim
             { 200m, 250m, 5000m, 0m }, // loss smaller than the deductible
             { 9000m, 250m, 5000m, 5000m }, // capped by the coverage limit
             { 0m, 0m, 5000m, 0m }, // nothing claimed
